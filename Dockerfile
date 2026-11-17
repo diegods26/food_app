@@ -1,5 +1,5 @@
 # ---- build -----
-FROM maven:4.0-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 RUN mvn -B -q dependency:go-offline
@@ -14,4 +14,4 @@ COPY --from=build /app/target/*.jar app.jar
 USER appuser
 EXPOSE 8080
 
-ENTRYPOINT ["top", "-XX:MaxRAMPercentage=70", "-XX:+UseSerialGC", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-XX:+UseSerialGC", "-jar", "/app/app.jar"]
