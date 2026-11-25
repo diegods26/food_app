@@ -32,7 +32,9 @@ management:
 app:
   security:
     jwt-secret: ${JWT_SECRET}
-    jwt-ttl-minutes: ${JWT_TTL_MINUTES}
+    jwt-ttl-minutes: ${JWT_TTL_MINUTES:15}
+    jwt-issuer: ${JWT_ISSUER:food-app}
+    jwt-audience: ${JWT_AUDIENCE:food-app-api}
     allowed-origin: ${FRONTEND_ORIGIN}
 
 springdoc:

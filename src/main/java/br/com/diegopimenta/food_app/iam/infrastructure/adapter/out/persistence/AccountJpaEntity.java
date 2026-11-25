@@ -40,11 +40,18 @@ public class AccountJpaEntity {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Column(name = "failed_login_attempts", nullable = false)
+    private int failedLoginAttempts;
+
+    @Column(name = "locked_until")
+    private Instant lockedUntil;
+
     protected AccountJpaEntity() { }
 
     AccountJpaEntity(UUID id, String email, String passwordHash,
                      AccountType type, AccountStatus status,
-                     Set<Role> roles, Instant createdAt)
+                     Set<Role> roles, Instant createdAt, int failedLoginAttempts,
+                     Instant lockedUntil)
     {
         this.id = id;
         this.email = email;
@@ -53,6 +60,8 @@ public class AccountJpaEntity {
         this.status = status;
         this.roles = new HashSet<>(roles);
         this.createdAt = createdAt;
+        this.failedLoginAttempts = failedLoginAttempts;
+        this.lockedUntil = lockedUntil;
     }
 
     UUID getId() { return id; }
@@ -62,4 +71,6 @@ public class AccountJpaEntity {
     AccountStatus getStatus() { return status; }
     Set<Role> getRoles() { return roles; }
     Instant getCreatedAt() { return createdAt; }
+    int getFailedLoginAttempts() { return failedLoginAttempts; }
+    Instant getLockedUntil() { return lockedUntil; }
 }

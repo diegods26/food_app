@@ -46,7 +46,11 @@ public class RegisterCustomerService implements RegisterCustomerUseCase {
             throw new CpfAlreadyInUseException();
 
         Account account = Account
-                .registerCustomer(email, passwordHasher.hash(rawPassword), clock.instant());
+                .registerCustomer(
+                        email,
+                        passwordHasher.hash(rawPassword),
+                        clock.instant());
+
         CustomerProfile profile = new CustomerProfile(account.id(), command.fullName(), cpf);
 
         accountRepository.save(account);

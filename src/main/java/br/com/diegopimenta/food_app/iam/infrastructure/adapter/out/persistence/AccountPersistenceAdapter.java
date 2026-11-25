@@ -6,6 +6,10 @@ import br.com.diegopimenta.food_app.iam.domain.model.Account;
 import br.com.diegopimenta.food_app.iam.domain.model.Email;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.Optional;
 
 @Repository
 public class AccountPersistenceAdapter implements AccountRepository {
@@ -23,6 +27,12 @@ public class AccountPersistenceAdapter implements AccountRepository {
     }
 
     @Override
+    public Optional<Account> findByEmail(Email email) {
+        return jpa.findByEmail(email.value())
+                .map(AccountPersistenceMapper::toDomain);
+    }
+
+    @Override
     public void save(Account account) {
         try {
             jpa.saveAndFlush(AccountPersistenceMapper.toEntity(account));
@@ -33,5 +43,33 @@ public class AccountPersistenceAdapter implements AccountRepository {
 
             throw e;
         }
+    }
+
+    @Override
+    @Transactional
+    public boolean recordFailedLoginAttempt(Email email,
+                                            int maxAttempts,
+                                            Instant now,
+                                            Instant lockUntil)
+    {
+        int updatedRows = jpa.recordFailedLoginAttempt(
+                email.value(),
+                maxAttempts,
+                now,
+                lockUntil
+        );
+
+        return updatedRows > 0;
+    }
+
+    @Override
+    @Transactional
+    public boolean resetLoginFailures(Email email, Instant now) {
+        int updatedRows = jpa.resetLoginFailures(
+                email.value(),
+                now
+        );
+
+        return updatedRows > 0;
     }
 }

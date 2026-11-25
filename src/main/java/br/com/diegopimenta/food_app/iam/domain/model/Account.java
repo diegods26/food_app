@@ -15,8 +15,13 @@ public final class Account {
     private AccountStatus status;
     private final Set<Role> roles;
     private final Instant createdAt;
+    private final int failedLoginAttempts;
+    private final Instant lockedUntil;
 
-    private Account(AccountId id, Email email, PasswordHash passwordHash, AccountType accountType, AccountStatus status, Set<Role> roles, Instant createdAt) {
+    private Account(AccountId id, Email email, PasswordHash passwordHash,
+                    AccountType accountType, AccountStatus status,
+                    Set<Role> roles, Instant createdAt,
+                    int failedLoginAttempts, Instant lockedUntil) {
         this.id = Objects.requireNonNull(id);
         this.email = Objects.requireNonNull(email);
         this.passwordHash = Objects.requireNonNull(passwordHash);
@@ -24,6 +29,8 @@ public final class Account {
         this.status = Objects.requireNonNull(status);
         this.roles = Set.copyOf(roles);
         this.createdAt = Objects.requireNonNull(createdAt);
+        this.failedLoginAttempts = failedLoginAttempts;
+        this.lockedUntil = lockedUntil;
     }
 
     // Fabricas
@@ -35,7 +42,9 @@ public final class Account {
                 AccountType.CUSTOMER,
                 AccountStatus.PENDING_VERIFICATION,
                 Set.of(Role.CUSTOMER),
-                now
+                now,
+                0,
+                null
                 );
     }
 
@@ -47,15 +56,19 @@ public final class Account {
                 AccountType.MERCHANT,
                 AccountStatus.PENDING_VERIFICATION,
                 Set.of(Role.MERCHANT_OWNER),
-                now
+                now,
+                0,
+                null
         );
     }
 
     /** Uso exclusivo de adaptadores de persistência: reidrata sem aplicar regras de criação. */
     public static Account restore(AccountId id, Email email, PasswordHash hash,
-                                  AccountType type, AccountStatus status, Set<Role> roles, Instant createdAt)
+                                  AccountType type, AccountStatus status,
+                                  Set<Role> roles, Instant createdAt,
+                                  int failedLoginAttempts, Instant lockedUntil)
     {
-       return new Account(id, email, hash, type, status, roles, createdAt);
+       return new Account(id, email, hash, type, status, roles, createdAt, failedLoginAttempts, lockedUntil);
     }
 
     // ---------- Comportamento (máquina de estados) ----------
@@ -77,8 +90,9 @@ public final class Account {
         status = AccountStatus.SUSPENDED;
     }
 
-    public boolean canAuthenticate() {
-        return status == AccountStatus.ACTIVE;
+    public boolean canAuthenticate(Instant now) {
+        return status == AccountStatus.ACTIVE
+                && (lockedUntil == null || !lockedUntil.isAfter(now));
     }
 
     public AccountId id() { return id; }
@@ -88,4 +102,6 @@ public final class Account {
     public AccountStatus status() { return status; }
     public Set<Role> roles() { return roles; }
     public Instant createdAt() { return createdAt; }
+    public int failedLoginAttempts() { return failedLoginAttempts; }
+    public Instant lockedUntil() { return lockedUntil; }
 }

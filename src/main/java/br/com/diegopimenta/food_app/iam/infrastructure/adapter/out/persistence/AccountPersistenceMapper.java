@@ -14,7 +14,9 @@ public final class AccountPersistenceMapper {
                 a.type(),
                 a.status(),
                 a.roles(),
-                a.createdAt()
+                a.createdAt(),
+                a.failedLoginAttempts(),
+                a.lockedUntil()
         );
     }
 
@@ -26,7 +28,9 @@ public final class AccountPersistenceMapper {
                 e.getType(),
                 e.getStatus(),
                 e.getRoles(),
-                e.getCreatedAt()
+                e.getCreatedAt(),
+                e.getFailedLoginAttempts(),
+                e.getLockedUntil()
         );
     }
 
